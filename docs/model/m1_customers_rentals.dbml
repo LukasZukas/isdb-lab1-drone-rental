@@ -1,0 +1,107 @@
+// M1 - VERTICAL FRAGMENT 1: Customers & Rentals  (DBVS1: db11 = LT, db12 = LV+EE)
+// Open in https://dbdiagram.io (paste this file) to view / edit the diagram.
+
+Project skyrent_m1 {
+  database_type: 'PostgreSQL'
+  Note: 'Vertical fragment M1 (commercial module). Implemented in db11 and its clone db12 on DBVS1.'
+}
+
+Table country [headercolor: #7f8c8d] {
+  country_code char(2) [pk]
+  name varchar(60) [not null, unique]
+  currency_code char(3) [not null]
+  phone_prefix varchar(5) [not null]
+  Note: 'Replicated classifier'
+}
+
+Table drone_category [headercolor: #7f8c8d] {
+  category_id integer [pk]
+  name varchar(60) [not null, unique]
+  description text [not null]
+  Note: 'Replicated classifier'
+}
+
+Table drone_model [headercolor: #7f8c8d] {
+  model_id integer [pk]
+  category_id integer [not null, ref: > drone_category.category_id]
+  manufacturer varchar(60) [not null]
+  model_name varchar(80) [not null]
+  max_flight_time_min smallint [not null]
+  max_payload_kg numeric(5,2) [not null]
+  max_range_km numeric(5,1) [not null]
+  camera_mp numeric(4,1)
+  weight_g integer [not null]
+  launch_year smallint [not null]
+  Note: 'Replicated classifier'
+}
+
+Table branch [headercolor: #8e44ad] {
+  branch_id integer [pk]
+  name varchar(80) [not null, unique]
+  city varchar(60) [not null]
+  country_code char(2) [not null, ref: > country.country_code, note: 'horizontal fragmentation attribute']
+  address varchar(120) [not null]
+  phone varchar(20) [not null]
+  email varchar(120) [not null]
+  opened_on date [not null]
+}
+
+Table customer [headercolor: #2471a3] {
+  customer_id integer [pk]
+  first_name varchar(60) [not null]
+  last_name varchar(60) [not null]
+  email varchar(120) [not null, unique]
+  phone varchar(20) [not null]
+  birth_date date [not null]
+  country_code char(2) [not null, ref: > country.country_code]
+  home_branch_id integer [not null, ref: > branch.branch_id]
+  pilot_license_no varchar(30) [not null, unique]
+  license_class varchar(5) [not null]
+  registered_at timestamp [not null]
+}
+
+Table drone_commercial [headercolor: #d35400] {
+  drone_id integer [pk, note: 'same key as M2.drone_technical']
+  model_id integer [not null, ref: > drone_model.model_id]
+  branch_id integer [not null, ref: > branch.branch_id]
+  purchase_date date [not null]
+  purchase_price numeric(10,2) [not null]
+  daily_rate numeric(8,2) [not null]
+  deposit_amount numeric(8,2) [not null]
+  status varchar(12) [not null]
+  Note: 'Vertical fragment of drone (commercial attributes)'
+}
+
+Table rental [headercolor: #2471a3] {
+  rental_id integer [pk]
+  customer_id integer [not null, ref: > customer.customer_id]
+  drone_id integer [not null, ref: > drone_commercial.drone_id]
+  branch_id integer [not null, ref: > branch.branch_id]
+  start_date date [not null]
+  end_date date [not null]
+  total_price numeric(10,2) [not null]
+  status varchar(10) [not null]
+}
+
+Table payment [headercolor: #2471a3] {
+  payment_id integer [pk]
+  rental_id integer [not null, ref: > rental.rental_id]
+  amount numeric(10,2) [not null]
+  method varchar(15) [not null]
+  payment_type varchar(15) [not null]
+  paid_at timestamp [not null]
+}
+
+TableGroup classifiers_replicated {
+  country
+  drone_category
+  drone_model
+}
+
+TableGroup M1_customers_rentals {
+  branch
+  customer
+  drone_commercial
+  rental
+  payment
+}

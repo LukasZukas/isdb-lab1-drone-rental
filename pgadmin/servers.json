@@ -1,0 +1,24 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "DBVS1 - M1 Customers and Rentals (db11, db12)",
+      "Group": "ISDB Lab 1",
+      "Host": "dbvs1",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PasswordExecCommand": "echo postgres",
+      "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "DBVS2 - M2 Fleet and Maintenance (db21, db22)",
+      "Group": "ISDB Lab 1",
+      "Host": "dbvs2",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "PasswordExecCommand": "echo postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}

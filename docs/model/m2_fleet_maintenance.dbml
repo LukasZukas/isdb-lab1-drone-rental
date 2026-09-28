@@ -1,0 +1,108 @@
+// M2 - VERTICAL FRAGMENT 2: Fleet Operations & Maintenance  (DBVS2: db21 = LT, db22 = LV+EE)
+// Open in https://dbdiagram.io (paste this file) to view / edit the diagram.
+
+Project skyrent_m2 {
+  database_type: 'PostgreSQL'
+  Note: 'Vertical fragment M2 (technical module). Implemented in db21 and its clone db22 on DBVS2.'
+}
+
+Table country [headercolor: #7f8c8d] {
+  country_code char(2) [pk]
+  name varchar(60) [not null, unique]
+  currency_code char(3) [not null]
+  phone_prefix varchar(5) [not null]
+  Note: 'Replicated classifier'
+}
+
+Table drone_category [headercolor: #7f8c8d] {
+  category_id integer [pk]
+  name varchar(60) [not null, unique]
+  description text [not null]
+  Note: 'Replicated classifier'
+}
+
+Table drone_model [headercolor: #7f8c8d] {
+  model_id integer [pk]
+  category_id integer [not null, ref: > drone_category.category_id]
+  manufacturer varchar(60) [not null]
+  model_name varchar(80) [not null]
+  max_flight_time_min smallint [not null]
+  max_payload_kg numeric(5,2) [not null]
+  max_range_km numeric(5,1) [not null]
+  camera_mp numeric(4,1)
+  weight_g integer [not null]
+  launch_year smallint [not null]
+  Note: 'Replicated classifier'
+}
+
+Table branch [headercolor: #8e44ad] {
+  branch_id integer [pk]
+  name varchar(80) [not null, unique]
+  city varchar(60) [not null]
+  country_code char(2) [not null, ref: > country.country_code, note: 'horizontal fragmentation attribute']
+  address varchar(120) [not null]
+  phone varchar(20) [not null]
+  email varchar(120) [not null]
+  opened_on date [not null]
+}
+
+Table drone_technical [headercolor: #d35400] {
+  drone_id integer [pk, note: 'same key as M1.drone_commercial']
+  model_id integer [not null, ref: > drone_model.model_id]
+  branch_id integer [not null, ref: > branch.branch_id]
+  serial_number varchar(40) [not null, unique]
+  firmware_version varchar(20) [not null]
+  total_flight_hours numeric(7,1) [not null]
+  battery_cycles integer [not null]
+  last_inspection_date date
+  condition varchar(10) [not null]
+  Note: 'Vertical fragment of drone (technical attributes)'
+}
+
+Table employee [headercolor: #1e8449] {
+  employee_id integer [pk]
+  branch_id integer [not null, ref: > branch.branch_id]
+  first_name varchar(60) [not null]
+  last_name varchar(60) [not null]
+  email varchar(120) [not null, unique]
+  role varchar(20) [not null]
+  certification varchar(60)
+  hired_on date [not null]
+}
+
+Table maintenance [headercolor: #1e8449] {
+  maintenance_id integer [pk]
+  drone_id integer [not null, ref: > drone_technical.drone_id]
+  employee_id integer [not null, ref: > employee.employee_id]
+  maintenance_date date [not null]
+  maintenance_type varchar(25) [not null]
+  description text [not null]
+  cost numeric(8,2) [not null]
+  downtime_hours numeric(5,1) [not null]
+}
+
+Table flight_log [headercolor: #1e8449] {
+  flight_id integer [pk]
+  drone_id integer [not null, ref: > drone_technical.drone_id]
+  rental_id integer [note: 'logical reference to M1.rental (other DBMS) - no FK']
+  started_at timestamp [not null]
+  duration_min smallint [not null]
+  max_altitude_m smallint [not null]
+  distance_km numeric(6,2) [not null]
+  battery_used_pct smallint [not null]
+  incident_reported boolean [not null]
+}
+
+TableGroup classifiers_replicated {
+  country
+  drone_category
+  drone_model
+}
+
+TableGroup M2_fleet_maintenance {
+  branch
+  drone_technical
+  employee
+  maintenance
+  flight_log
+}
