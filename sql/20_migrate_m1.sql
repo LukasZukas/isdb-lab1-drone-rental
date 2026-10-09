@@ -1,6 +1,6 @@
 -- =====================================================================
--- VERTICAL FRAGMENTATION - data migration isdb_original -> db11 (M1)
--- Runs in: DBVS1 / db11
+-- VERTICAL FRAGMENTATION - data migration isdb_original -> m1_lt (M1)
+-- Runs in: m1_lt
 -- psql variables: orig_host, orig_port, pg_user, pg_password
 --
 -- The original database is attached through postgres_fdw, the M1

@@ -171,7 +171,7 @@
 <polygon fill="none" stroke="#29235c" points="2223.56,-1713.69 2223.56,-1773.69 2614.56,-1773.69 2614.56,-1713.69 2223.56,-1713.69"/>
 <text text-anchor="start" x="2234.56" y="-1734.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">branch_id</text>
 <text text-anchor="start" x="2375.05" y="-1734.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
-<text text-anchor="start" x="2505.76" y="-1734.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="2543.09" y="-1734.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="2223.56,-1653.69 2223.56,-1713.69 2614.56,-1713.69 2614.56,-1653.69 2223.56,-1653.69"/>
 <polygon fill="none" stroke="#29235c" points="2223.56,-1653.69 2223.56,-1713.69 2614.56,-1713.69 2614.56,-1653.69 2223.56,-1653.69"/>
 <text text-anchor="start" x="2234.56" y="-1673.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">name &#160;&#160;&#160;</text>
@@ -276,7 +276,7 @@
 <polygon fill="#e7e2dd" stroke="transparent" points="1494.39,-1293.69 1494.39,-1353.69 1982.39,-1353.69 1982.39,-1293.69 1494.39,-1293.69"/>
 <polygon fill="none" stroke="#29235c" points="1494.39,-1293.69 1494.39,-1353.69 1982.39,-1353.69 1982.39,-1293.69 1494.39,-1293.69"/>
 <text text-anchor="start" x="1505.39" y="-1313.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">home_branch_id &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1834.49" y="-1314.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1871.83" y="-1314.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <text text-anchor="start" x="1932.3" y="-1314.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
 <text text-anchor="start" x="1941.19" y="-1314.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="1494.39,-1233.69 1494.39,-1293.69 1982.39,-1293.69 1982.39,-1233.69 1494.39,-1233.69"/>
@@ -329,7 +329,7 @@
 <polygon fill="none" stroke="#29235c" points="1482.39,-708.69 1482.39,-768.69 1994.39,-768.69 1994.39,-708.69 1482.39,-708.69"/>
 <text text-anchor="start" x="1493.39" y="-729.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">drone_id</text>
 <text text-anchor="start" x="1617.87" y="-729.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1885.59" y="-729.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1922.92" y="-729.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="1482.39,-648.69 1482.39,-708.69 1994.39,-708.69 1994.39,-648.69 1482.39,-648.69"/>
 <polygon fill="none" stroke="#29235c" points="1482.39,-648.69 1482.39,-708.69 1994.39,-708.69 1994.39,-648.69 1482.39,-648.69"/>
 <text text-anchor="start" x="1493.39" y="-668.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">model_id &#160;&#160;&#160;</text>
@@ -339,7 +339,7 @@
 <polygon fill="#e7e2dd" stroke="transparent" points="1482.39,-588.69 1482.39,-648.69 1994.39,-648.69 1994.39,-588.69 1482.39,-588.69"/>
 <polygon fill="none" stroke="#29235c" points="1482.39,-588.69 1482.39,-648.69 1994.39,-648.69 1994.39,-588.69 1482.39,-588.69"/>
 <text text-anchor="start" x="1493.39" y="-608.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">branch_id &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1846.49" y="-609.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1883.83" y="-609.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <text text-anchor="start" x="1944.3" y="-609.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
 <text text-anchor="start" x="1953.19" y="-609.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="1482.39,-528.69 1482.39,-588.69 1994.39,-588.69 1994.39,-528.69 1482.39,-528.69"/>
@@ -405,7 +405,7 @@
 <polygon fill="none" stroke="#29235c" points="802.86,-1713.69 802.86,-1773.69 1243.86,-1773.69 1243.86,-1713.69 802.86,-1713.69"/>
 <text text-anchor="start" x="813.86" y="-1734.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">rental_id</text>
 <text text-anchor="start" x="936.55" y="-1734.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1135.06" y="-1734.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1172.39" y="-1734.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="802.86,-1653.69 802.86,-1713.69 1243.86,-1713.69 1243.86,-1653.69 802.86,-1653.69"/>
 <polygon fill="none" stroke="#29235c" points="802.86,-1653.69 802.86,-1713.69 1243.86,-1713.69 1243.86,-1653.69 802.86,-1653.69"/>
 <text text-anchor="start" x="813.86" y="-1673.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">customer_id &#160;&#160;&#160;</text>
@@ -415,13 +415,13 @@
 <polygon fill="#e7e2dd" stroke="transparent" points="802.86,-1593.69 802.86,-1653.69 1243.86,-1653.69 1243.86,-1593.69 802.86,-1593.69"/>
 <polygon fill="none" stroke="#29235c" points="802.86,-1593.69 802.86,-1653.69 1243.86,-1653.69 1243.86,-1593.69 802.86,-1593.69"/>
 <text text-anchor="start" x="813.86" y="-1613.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">drone_id &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1095.96" y="-1614.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1133.3" y="-1614.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <text text-anchor="start" x="1193.77" y="-1614.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
 <text text-anchor="start" x="1202.66" y="-1614.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="802.86,-1533.69 802.86,-1593.69 1243.86,-1593.69 1243.86,-1533.69 802.86,-1533.69"/>
 <polygon fill="none" stroke="#29235c" points="802.86,-1533.69 802.86,-1593.69 1243.86,-1593.69 1243.86,-1533.69 802.86,-1533.69"/>
 <text text-anchor="start" x="813.86" y="-1553.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">branch_id &#160;&#160;&#160;</text>
-<text text-anchor="start" x="1095.96" y="-1554.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="1133.3" y="-1554.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <text text-anchor="start" x="1193.77" y="-1554.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
 <text text-anchor="start" x="1202.66" y="-1554.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="802.86,-1473.69 802.86,-1533.69 1243.86,-1533.69 1243.86,-1473.69 802.86,-1473.69"/>
@@ -492,7 +492,7 @@
 <polygon fill="#e7e2dd" stroke="transparent" points="114.1,-1653.69 114.1,-1713.69 574.1,-1713.69 574.1,-1653.69 114.1,-1653.69"/>
 <polygon fill="none" stroke="#29235c" points="114.1,-1653.69 114.1,-1713.69 574.1,-1713.69 574.1,-1653.69 114.1,-1653.69"/>
 <text text-anchor="start" x="125.1" y="-1673.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">rental_id &#160;&#160;&#160;</text>
-<text text-anchor="start" x="426.2" y="-1674.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">integer</text>
+<text text-anchor="start" x="463.54" y="-1674.89" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">uuid</text>
 <text text-anchor="start" x="524.01" y="-1674.89" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> </text>
 <text text-anchor="start" x="532.9" y="-1674.89" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">(!)</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="114.1,-1593.69 114.1,-1653.69 574.1,-1653.69 574.1,-1593.69 114.1,-1593.69"/>

@@ -1,44 +1,32 @@
-# Two independent PostgreSQL DBMS instances (DBVS1, DBVS2), a one-shot
-# builder that creates all fragments, and pgAdmin with both servers registered.
+# DBVS1 (PostgreSQL: M0 + M1 fragments), a one-shot builder and pgAdmin.
+# Credentials come from .env (copy .env.example to .env).
 #
 #   docker compose up -d          -> build everything, pgAdmin on http://localhost:5050
-#   docker compose run --rm setup -> rebuild / reset all databases
+#   docker compose run --rm setup -> rebuild / reset the databases
 name: isdb-lab1
 
 services:
   dbvs1:
     image: postgres:17
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
     ports: ["5433:5432"]
     volumes: [dbvs1-data:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER}"]
       interval: 2s
       retries: 30
 
-  dbvs2:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports: ["5434:5432"]
-    volumes: [dbvs2-data:/var/lib/postgresql/data]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 2s
-      retries: 30
+  # dbvs2: MongoDB for M2 (document model) - added in the next step
 
   setup:
     image: postgres:17
     depends_on:
       dbvs1: { condition: service_healthy }
-      dbvs2: { condition: service_healthy }
     environment:
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      KEEP_ORIGINAL: ${KEEP_ORIGINAL:-0}
+      PGUSER: ${PG_USER}
+      PGPASSWORD: ${PG_PASSWORD}
     volumes:
       - ./sql:/work/sql:ro
       - ./scripts:/work/scripts:ro
@@ -47,13 +35,12 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    depends_on: [dbvs1, dbvs2]
+    depends_on: [dbvs1]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
-      PGADMIN_CONFIG_ENABLE_SERVER_PASS_EXEC_CMD: "True"
     ports: ["5050:80"]
     volumes:
       - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
@@ -61,4 +48,3 @@ services:
 
 volumes:
   dbvs1-data:
-  dbvs2-data:

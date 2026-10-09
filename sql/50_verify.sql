@@ -1,66 +1,75 @@
 -- =====================================================================
--- CORRECTNESS CHECK of the fragmentation (run before the original is dropped)
--- Runs in: DBVS1 / isdb_global
+-- CORRECTNESS CHECK of M1 (M0 projection = m1_lt UNION ALL m1_lvee)
+-- Runs in: isdb_original
 -- psql variables: dbvs1_host, dbvs1_port, pg_user, pg_password
 --
--- For every original relation R and its reconstruction R' (global view):
---   completeness + reconstruction : count(R) = count(R') and R EXCEPT R' = {} and R' EXCEPT R = {}
---   disjointness                  : no key appears in both horizontal fragments
--- Any failure raises an exception (the build stops).
+-- For every M1 table: count, EXCEPT both ways, and the two horizontal
+-- fragments must not share a key. Any failure stops the build.
+-- The fdw link is temporary and is removed at the end.
 -- =====================================================================
 
-CREATE SERVER src_original FOREIGN DATA WRAPPER postgres_fdw
-    OPTIONS (host :'dbvs1_host', port :'dbvs1_port', dbname 'isdb_original');
-CREATE USER MAPPING FOR PUBLIC SERVER src_original OPTIONS (user :'pg_user', password :'pg_password');
-CREATE SCHEMA orig;
-IMPORT FOREIGN SCHEMA public FROM SERVER src_original INTO orig;
+CREATE EXTENSION postgres_fdw;
+CREATE SERVER srv_lt   FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host :'dbvs1_host', port :'dbvs1_port', dbname 'm1_lt');
+CREATE SERVER srv_lvee FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host :'dbvs1_host', port :'dbvs1_port', dbname 'm1_lvee');
+CREATE USER MAPPING FOR CURRENT_USER SERVER srv_lt   OPTIONS (user :'pg_user', password :'pg_password');
+CREATE USER MAPPING FOR CURRENT_USER SERVER srv_lvee OPTIONS (user :'pg_user', password :'pg_password');
+CREATE SCHEMA h1;
+CREATE SCHEMA h2;
+IMPORT FOREIGN SCHEMA public FROM SERVER srv_lt   INTO h1;
+IMPORT FOREIGN SCHEMA public FROM SERVER srv_lvee INTO h2;
 
 DO $$
 DECLARE
-    t text;
-    n_orig bigint; n_glob bigint; missing bigint; extra bigint; overlap bigint;
-    keys constant jsonb := '{"branch":"branch_id","customer":"customer_id","rental":"rental_id","payment":"payment_id",
-                             "employee":"employee_id","maintenance":"maintenance_id","flight_log":"flight_id"}';
+    r record;
+    n_orig bigint; n_frag bigint; missing bigint; extra bigint; overlap bigint;
 BEGIN
-    FOREACH t IN ARRAY ARRAY['country', 'drone_category', 'drone_model', 'branch', 'customer', 'drone',
-                             'rental', 'payment', 'employee', 'maintenance', 'flight_log']
+    -- M1 table, the M0 query that gives its content, key, horizontally fragmented?
+    FOR r IN SELECT * FROM (VALUES
+        ('country',          'SELECT * FROM public.country',        'country_code', false),
+        ('drone_category',   'SELECT * FROM public.drone_category', 'category_id',  false),
+        ('drone_model',      'SELECT * FROM public.drone_model',    'model_id',     false),
+        ('branch',           'SELECT * FROM public.branch',         'branch_id',    true),
+        ('customer',         'SELECT * FROM public.customer',       'customer_id',  true),
+        ('drone_commercial', 'SELECT drone_id, model_id, branch_id, purchase_date, purchase_price,
+                                     daily_rate, deposit_amount, status FROM public.drone', 'drone_id', true),
+        ('rental',           'SELECT * FROM public.rental',         'rental_id',    true),
+        ('payment',          'SELECT * FROM public.payment',        'payment_id',   true)
+    ) v(tbl, src, key, horizontal)
     LOOP
-        EXECUTE format('SELECT count(*) FROM orig.%I', t) INTO n_orig;
-        EXECUTE format('SELECT count(*) FROM global.%I', t) INTO n_glob;
-        EXECUTE format('SELECT count(*) FROM (SELECT * FROM orig.%I EXCEPT SELECT * FROM global.%I) x', t, t) INTO missing;
-        EXECUTE format('SELECT count(*) FROM (SELECT * FROM global.%I EXCEPT SELECT * FROM orig.%I) x', t, t) INTO extra;
-        IF n_orig <> n_glob OR missing <> 0 OR extra <> 0 THEN
-            RAISE EXCEPTION 'FAILED %: original=% reconstructed=% missing=% extra=%', t, n_orig, n_glob, missing, extra;
+        IF r.horizontal THEN
+            -- union of the two horizontal fragments must equal the M0 projection
+            EXECUTE format('SELECT count(*) FROM (%s) x', r.src) INTO n_orig;
+            EXECUTE format('SELECT (SELECT count(*) FROM h1.%1$I) + (SELECT count(*) FROM h2.%1$I)', r.tbl) INTO n_frag;
+            EXECUTE format('SELECT count(*) FROM ((%s) EXCEPT (SELECT * FROM h1.%2$I UNION ALL SELECT * FROM h2.%2$I)) x', r.src, r.tbl) INTO missing;
+            EXECUTE format('SELECT count(*) FROM ((SELECT * FROM h1.%2$I UNION ALL SELECT * FROM h2.%2$I) EXCEPT (%1$s)) x', r.src, r.tbl) INTO extra;
+            EXECUTE format('SELECT count(*) FROM h1.%1$I a JOIN h2.%1$I b USING (%2$I)', r.tbl, r.key) INTO overlap;
+        ELSE
+            -- classifiers: each fragment holds a full copy
+            EXECUTE format('SELECT count(*) FROM (%s) x', r.src) INTO n_orig;
+            EXECUTE format('SELECT count(*) FROM h1.%I', r.tbl) INTO n_frag;
+            EXECUTE format('SELECT count(*) FROM ((%1$s) EXCEPT SELECT * FROM h1.%2$I) x', r.src, r.tbl) INTO missing;
+            EXECUTE format('SELECT count(*) FROM ((%1$s) EXCEPT SELECT * FROM h2.%2$I) x', r.src, r.tbl) INTO extra;
+            overlap := 0;
         END IF;
-        RAISE NOTICE 'OK  %  (% rows: original = reconstructed)', rpad(t, 15), n_orig;
-    END LOOP;
-
-    -- horizontal fragments must be disjoint
-    FOR t IN SELECT jsonb_object_keys(keys) LOOP
-        EXECUTE format(
-            'SELECT count(*) FROM %1$s.%2$I a JOIN %3$s.%2$I b USING (%4$I)',
-            CASE WHEN t IN ('employee', 'maintenance', 'flight_log') THEN 'db21' ELSE 'db11' END, t,
-            CASE WHEN t IN ('employee', 'maintenance', 'flight_log') THEN 'db22' ELSE 'db12' END, keys ->> t)
-        INTO overlap;
-        IF overlap <> 0 THEN
-            RAISE EXCEPTION 'FAILED disjointness of %: % keys in both fragments', t, overlap;
+        IF n_orig <> n_frag OR missing <> 0 OR extra <> 0 OR overlap <> 0 THEN
+            RAISE EXCEPTION 'FAILED %: M0=% fragments=% missing=% extra=% overlap=%',
+                r.tbl, n_orig, n_frag, missing, extra, overlap;
         END IF;
+        RAISE NOTICE 'OK  %  % rows  %', rpad(r.tbl, 17), lpad(n_orig::text, 3),
+            CASE WHEN r.horizontal THEN '(m1_lt + m1_lvee, disjoint)' ELSE '(full copy in both)' END;
     END LOOP;
-    SELECT count(*) INTO overlap FROM db11.drone_commercial a JOIN db12.drone_commercial b USING (drone_id);
-    IF overlap <> 0 THEN RAISE EXCEPTION 'FAILED disjointness of drone_commercial'; END IF;
-    SELECT count(*) INTO overlap FROM db21.drone_technical a JOIN db22.drone_technical b USING (drone_id);
-    IF overlap <> 0 THEN RAISE EXCEPTION 'FAILED disjointness of drone_technical'; END IF;
-    RAISE NOTICE 'OK  horizontal fragments are disjoint';
-
-    -- vertical fragments must contain the same keys
-    SELECT count(*) INTO overlap FROM (
-        (SELECT drone_id FROM db11.drone_commercial UNION ALL SELECT drone_id FROM db12.drone_commercial)
-        EXCEPT
-        (SELECT drone_id FROM db21.drone_technical UNION ALL SELECT drone_id FROM db22.drone_technical)) x;
-    IF overlap <> 0 THEN RAISE EXCEPTION 'FAILED vertical fragments have different drone_id sets'; END IF;
-    RAISE NOTICE 'OK  vertical fragments drone_commercial / drone_technical have the same keys';
 END $$;
 
+-- row counts per fragment
+SELECT t AS "table",
+       (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM h1.%I', t), false, true, '')))[1]::text::int AS m1_lt,
+       (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM h2.%I', t), false, true, '')))[1]::text::int AS m1_lvee
+FROM unnest(ARRAY['country', 'drone_category', 'drone_model', 'branch', 'customer',
+                  'drone_commercial', 'rental', 'payment']) t;
+
 SET client_min_messages = warning;
-DROP SCHEMA orig CASCADE;
-DROP SERVER src_original CASCADE;
+DROP SCHEMA h1 CASCADE;
+DROP SCHEMA h2 CASCADE;
+DROP SERVER srv_lt CASCADE;
+DROP SERVER srv_lvee CASCADE;
+DROP EXTENSION postgres_fdw;

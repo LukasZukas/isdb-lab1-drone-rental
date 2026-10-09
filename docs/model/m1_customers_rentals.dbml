@@ -1,9 +1,9 @@
-// M1 - VERTICAL FRAGMENT 1: Customers & Rentals  (DBVS1: db11 = LT, db12 = LV+EE)
+// M1 - VERTICAL FRAGMENT 1: Customers & Rentals  (PostgreSQL: m1_lt = LT, m1_lvee = LV+EE)
 // Open in https://dbdiagram.io (paste this file) to view / edit the diagram.
 
 Project skyrent_m1 {
   database_type: 'PostgreSQL'
-  Note: 'Vertical fragment M1 (commercial module). Implemented in db11 and its clone db12 on DBVS1.'
+  Note: 'Vertical fragment M1 (commercial module). Implemented in m1_lt (M1-H1) and m1_lvee (M1-H2).'
 }
 
 Table country [headercolor: #7f8c8d] {
@@ -36,7 +36,7 @@ Table drone_model [headercolor: #7f8c8d] {
 }
 
 Table branch [headercolor: #8e44ad] {
-  branch_id integer [pk]
+  branch_id uuid [pk]
   name varchar(80) [not null, unique]
   city varchar(60) [not null]
   country_code char(2) [not null, ref: > country.country_code, note: 'horizontal fragmentation attribute']
@@ -54,16 +54,16 @@ Table customer [headercolor: #2471a3] {
   phone varchar(20) [not null]
   birth_date date [not null]
   country_code char(2) [not null, ref: > country.country_code]
-  home_branch_id integer [not null, ref: > branch.branch_id]
+  home_branch_id uuid [not null, ref: > branch.branch_id]
   pilot_license_no varchar(30) [not null, unique]
   license_class varchar(5) [not null]
   registered_at timestamp [not null]
 }
 
 Table drone_commercial [headercolor: #d35400] {
-  drone_id integer [pk, note: 'same key as M2.drone_technical']
+  drone_id uuid [pk, note: 'UUID, same id as the M2 drone document']
   model_id integer [not null, ref: > drone_model.model_id]
-  branch_id integer [not null, ref: > branch.branch_id]
+  branch_id uuid [not null, ref: > branch.branch_id]
   purchase_date date [not null]
   purchase_price numeric(10,2) [not null]
   daily_rate numeric(8,2) [not null]
@@ -73,10 +73,10 @@ Table drone_commercial [headercolor: #d35400] {
 }
 
 Table rental [headercolor: #2471a3] {
-  rental_id integer [pk]
+  rental_id uuid [pk]
   customer_id integer [not null, ref: > customer.customer_id]
-  drone_id integer [not null, ref: > drone_commercial.drone_id]
-  branch_id integer [not null, ref: > branch.branch_id]
+  drone_id uuid [not null, ref: > drone_commercial.drone_id]
+  branch_id uuid [not null, ref: > branch.branch_id]
   start_date date [not null]
   end_date date [not null]
   total_price numeric(10,2) [not null]
@@ -85,7 +85,7 @@ Table rental [headercolor: #2471a3] {
 
 Table payment [headercolor: #2471a3] {
   payment_id integer [pk]
-  rental_id integer [not null, ref: > rental.rental_id]
+  rental_id uuid [not null, ref: > rental.rental_id]
   amount numeric(10,2) [not null]
   method varchar(15) [not null]
   payment_type varchar(15) [not null]

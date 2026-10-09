@@ -2,9 +2,10 @@
 -- M0 - ORIGINAL (unfragmented) database model: "SkyRent" drone rental
 -- Runs in: DBVS1 / isdb_original
 --
--- Primary keys are plain INTEGER values (no SERIAL / IDENTITY) so that
--- vertically split rows keep identical keys in every fragment and no
--- auto-increment synchronisation between fragments is needed.
+-- Objects shared by M1 and M2 (branch, drone, rental, employee) use UUID
+-- keys (generated once, stored in 01_original_data.sql), so the
+-- same object has the same id in PostgreSQL and in the document DB.
+-- Other keys are plain INTEGER (no SERIAL) - they never leave one fragment.
 -- =====================================================================
 
 -- ---------- Classifiers (replicated in full to every fragment) ----------
@@ -42,7 +43,7 @@ COMMENT ON TABLE drone_model IS 'Classifier: drone model catalogue with manufact
 -- ---------- Domain tables ----------
 
 CREATE TABLE branch (
-    branch_id    integer      PRIMARY KEY,
+    branch_id    uuid         PRIMARY KEY,
     name         varchar(80)  NOT NULL UNIQUE,
     city         varchar(60)  NOT NULL,
     country_code char(2)      NOT NULL REFERENCES country,
@@ -61,7 +62,7 @@ CREATE TABLE customer (
     phone            varchar(20)  NOT NULL,
     birth_date       date         NOT NULL,
     country_code     char(2)      NOT NULL REFERENCES country,
-    home_branch_id   integer      NOT NULL REFERENCES branch,
+    home_branch_id   uuid         NOT NULL REFERENCES branch,
     pilot_license_no varchar(30)  NOT NULL UNIQUE,
     license_class    varchar(5)   NOT NULL CHECK (license_class IN ('A1/A3', 'A2', 'STS')),
     registered_at    timestamp    NOT NULL
@@ -69,9 +70,9 @@ CREATE TABLE customer (
 COMMENT ON TABLE customer IS 'Customer (drone pilot) registered at a home branch.';
 
 CREATE TABLE drone (
-    drone_id             integer       PRIMARY KEY,
+    drone_id             uuid          PRIMARY KEY,
     model_id             integer       NOT NULL REFERENCES drone_model,
-    branch_id            integer       NOT NULL REFERENCES branch,
+    branch_id            uuid          NOT NULL REFERENCES branch,
     serial_number        varchar(40)   NOT NULL UNIQUE,
     purchase_date        date          NOT NULL,
     purchase_price       numeric(10,2) NOT NULL,
@@ -87,10 +88,10 @@ CREATE TABLE drone (
 COMMENT ON TABLE drone IS 'Physical drone unit (14 attributes) - the table that is split VERTICALLY into drone_commercial (M1) and drone_technical (M2).';
 
 CREATE TABLE rental (
-    rental_id   integer       PRIMARY KEY,
+    rental_id   uuid          PRIMARY KEY,
     customer_id integer       NOT NULL REFERENCES customer,
-    drone_id    integer       NOT NULL REFERENCES drone,
-    branch_id   integer       NOT NULL REFERENCES branch,
+    drone_id    uuid          NOT NULL REFERENCES drone,
+    branch_id   uuid          NOT NULL REFERENCES branch,
     start_date  date          NOT NULL,
     end_date    date          NOT NULL,
     total_price numeric(10,2) NOT NULL,
@@ -101,7 +102,7 @@ COMMENT ON TABLE rental IS 'Rental agreement of one drone by one customer at a b
 
 CREATE TABLE payment (
     payment_id   integer       PRIMARY KEY,
-    rental_id    integer       NOT NULL REFERENCES rental,
+    rental_id    uuid          NOT NULL REFERENCES rental,
     amount       numeric(10,2) NOT NULL CHECK (amount > 0),
     method       varchar(15)   NOT NULL CHECK (method IN ('card', 'bank_transfer', 'cash', 'paypal')),
     payment_type varchar(15)   NOT NULL CHECK (payment_type IN ('deposit', 'rental_fee', 'deposit_refund', 'damage_fee')),
@@ -110,8 +111,8 @@ CREATE TABLE payment (
 COMMENT ON TABLE payment IS 'Money movement related to a rental (deposit, fee, refund, damage fee).';
 
 CREATE TABLE employee (
-    employee_id   integer      PRIMARY KEY,
-    branch_id     integer      NOT NULL REFERENCES branch,
+    employee_id   uuid         PRIMARY KEY,
+    branch_id     uuid         NOT NULL REFERENCES branch,
     first_name    varchar(60)  NOT NULL,
     last_name     varchar(60)  NOT NULL,
     email         varchar(120) NOT NULL UNIQUE,
@@ -123,8 +124,8 @@ COMMENT ON TABLE employee IS 'Branch staff (technicians do maintenance).';
 
 CREATE TABLE maintenance (
     maintenance_id   integer       PRIMARY KEY,
-    drone_id         integer       NOT NULL REFERENCES drone,
-    employee_id      integer       NOT NULL REFERENCES employee,
+    drone_id         uuid          NOT NULL REFERENCES drone,
+    employee_id      uuid          NOT NULL REFERENCES employee,
     maintenance_date date          NOT NULL,
     maintenance_type varchar(25)   NOT NULL,
     description      text          NOT NULL,
@@ -135,8 +136,8 @@ COMMENT ON TABLE maintenance IS 'Service / repair record of a drone.';
 
 CREATE TABLE flight_log (
     flight_id         integer      PRIMARY KEY,
-    drone_id          integer      NOT NULL REFERENCES drone,
-    rental_id         integer      REFERENCES rental,
+    drone_id          uuid         NOT NULL REFERENCES drone,
+    rental_id         uuid         REFERENCES rental,
     started_at        timestamp    NOT NULL,
     duration_min      smallint     NOT NULL,
     max_altitude_m    smallint     NOT NULL CHECK (max_altitude_m <= 120),

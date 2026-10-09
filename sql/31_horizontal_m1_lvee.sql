@@ -1,6 +1,6 @@
 -- =====================================================================
--- HORIZONTAL FRAGMENTATION of M1 - fragment DB12 = LATVIA + ESTONIA
--- Runs in: DBVS1 / db12   (a clone of db11 made with CREATE DATABASE ... TEMPLATE)
+-- HORIZONTAL FRAGMENTATION of M1 - M1-H2 = LATVIA + ESTONIA
+-- Runs in: m1_lvee   (a clone of m1_lt made with CREATE DATABASE ... TEMPLATE)
 --
 -- Primary horizontal fragmentation : branch   WHERE country_code <> 'LT'
 -- Derived fragmentation (semi-join) : customer, drone_commercial, rental, payment

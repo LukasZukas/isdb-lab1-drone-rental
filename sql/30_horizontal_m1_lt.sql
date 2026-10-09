@@ -1,6 +1,6 @@
 -- =====================================================================
--- HORIZONTAL FRAGMENTATION of M1 - fragment DB11 = LITHUANIA
--- Runs in: DBVS1 / db11
+-- HORIZONTAL FRAGMENTATION of M1 - M1-H1 = LITHUANIA
+-- Runs in: m1_lt
 --
 -- Primary horizontal fragmentation : branch   WHERE country_code =  'LT'
 -- Derived fragmentation (semi-join) : customer, drone_commercial, rental, payment

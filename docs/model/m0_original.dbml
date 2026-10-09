@@ -3,7 +3,7 @@
 
 Project skyrent_original {
   database_type: 'PostgreSQL'
-  Note: 'Original model before fragmentation. 11 tables; drone has 14 attributes and is split vertically.'
+  Note: 'Original model before fragmentation. UUID keys for objects shared by M1/M2. 11 tables; drone has 14 attributes and is split vertically.'
 }
 
 Table country [headercolor: #7f8c8d] {
@@ -36,7 +36,7 @@ Table drone_model [headercolor: #7f8c8d] {
 }
 
 Table branch [headercolor: #8e44ad] {
-  branch_id integer [pk]
+  branch_id uuid [pk]
   name varchar(80) [not null, unique]
   city varchar(60) [not null]
   country_code char(2) [not null, ref: > country.country_code, note: 'horizontal fragmentation attribute']
@@ -54,16 +54,16 @@ Table customer [headercolor: #2471a3] {
   phone varchar(20) [not null]
   birth_date date [not null]
   country_code char(2) [not null, ref: > country.country_code]
-  home_branch_id integer [not null, ref: > branch.branch_id]
+  home_branch_id uuid [not null, ref: > branch.branch_id]
   pilot_license_no varchar(30) [not null, unique]
   license_class varchar(5) [not null, note: 'A1/A3 | A2 | STS']
   registered_at timestamp [not null]
 }
 
 Table drone [headercolor: #d35400] {
-  drone_id integer [pk]
+  drone_id uuid [pk]
   model_id integer [not null, ref: > drone_model.model_id]
-  branch_id integer [not null, ref: > branch.branch_id]
+  branch_id uuid [not null, ref: > branch.branch_id]
   serial_number varchar(40) [not null, unique]
   purchase_date date [not null]
   purchase_price numeric(10,2) [not null]
@@ -75,14 +75,14 @@ Table drone [headercolor: #d35400] {
   battery_cycles integer [not null]
   last_inspection_date date
   condition varchar(10) [not null, note: 'excellent | good | fair | poor']
-  Note: '14 attributes - split VERTICALLY: commercial part -> M1, technical part -> M2'
+  Note: '14 attributes - split VERTICALLY: commercial part -> M1 (PostgreSQL), technical part -> M2 (document DB)'
 }
 
 Table rental [headercolor: #2471a3] {
-  rental_id integer [pk]
+  rental_id uuid [pk]
   customer_id integer [not null, ref: > customer.customer_id]
-  drone_id integer [not null, ref: > drone.drone_id]
-  branch_id integer [not null, ref: > branch.branch_id]
+  drone_id uuid [not null, ref: > drone.drone_id]
+  branch_id uuid [not null, ref: > branch.branch_id]
   start_date date [not null]
   end_date date [not null]
   total_price numeric(10,2) [not null]
@@ -91,7 +91,7 @@ Table rental [headercolor: #2471a3] {
 
 Table payment [headercolor: #2471a3] {
   payment_id integer [pk]
-  rental_id integer [not null, ref: > rental.rental_id]
+  rental_id uuid [not null, ref: > rental.rental_id]
   amount numeric(10,2) [not null]
   method varchar(15) [not null]
   payment_type varchar(15) [not null]
@@ -99,8 +99,8 @@ Table payment [headercolor: #2471a3] {
 }
 
 Table employee [headercolor: #1e8449] {
-  employee_id integer [pk]
-  branch_id integer [not null, ref: > branch.branch_id]
+  employee_id uuid [pk]
+  branch_id uuid [not null, ref: > branch.branch_id]
   first_name varchar(60) [not null]
   last_name varchar(60) [not null]
   email varchar(120) [not null, unique]
@@ -111,8 +111,8 @@ Table employee [headercolor: #1e8449] {
 
 Table maintenance [headercolor: #1e8449] {
   maintenance_id integer [pk]
-  drone_id integer [not null, ref: > drone.drone_id]
-  employee_id integer [not null, ref: > employee.employee_id]
+  drone_id uuid [not null, ref: > drone.drone_id]
+  employee_id uuid [not null, ref: > employee.employee_id]
   maintenance_date date [not null]
   maintenance_type varchar(25) [not null]
   description text [not null]
@@ -122,8 +122,8 @@ Table maintenance [headercolor: #1e8449] {
 
 Table flight_log [headercolor: #1e8449] {
   flight_id integer [pk]
-  drone_id integer [not null, ref: > drone.drone_id]
-  rental_id integer [ref: > rental.rental_id]
+  drone_id uuid [not null, ref: > drone.drone_id]
+  rental_id uuid [ref: > rental.rental_id]
   started_at timestamp [not null]
   duration_min smallint [not null]
   max_altitude_m smallint [not null]
@@ -138,19 +138,19 @@ TableGroup classifiers_replicated {
   drone_model
 }
 
-TableGroup future_M1_customers_rentals {
+TableGroup M1_customers_rentals_postgresql {
+  branch
   customer
   rental
   payment
 }
 
-TableGroup future_M2_fleet_maintenance {
+TableGroup M2_fleet_maintenance_document_db {
   employee
   maintenance
   flight_log
 }
 
-TableGroup shared_and_split {
-  branch
+TableGroup split_vertically {
   drone
 }
